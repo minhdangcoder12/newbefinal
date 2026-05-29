@@ -1,55 +1,8 @@
-/**
- * Model data for Project 5 - the photo sharing site.
- * This module returns an object called models with the following
- * functions:
- *
- * models.userListModel() - A function that returns the list of users on
- * the system. The list is returned as an array of objects containing:
- *   _id (string)         - The ID of the user.
- *   first_name (string)  - The first name of the user.
- *   last_name (string)   - The last name of the user.
- *   location (string)    - The location of the user.
- *   description (string) - A brief user description.
- *   occupation (string)  - The occupation of the user.
- *
- * models.userModel() - A function that returns the info of the specified
- * user. Called with an user ID (id), the function returns n object containing:
- *   _id (string)         - The ID of the user.
- *   first_name (string)  - The first name of the user.
- *   last_name (string)   - The last name of the user.
- *   location (string)    - The location of the user.
- *   description (string) - A brief user description.
- *   occupation (string)  - The occupation of the user.
- *
- * models.photoOfUserModel() - A function that returns the photos belong to
- * the specified user. Called with an user ID (id), the function returns an
- * object containing:
- *   _id (string)         - The ID of the photo
- *   date_time (date)     - The date and time the picture was taken in ISO
- *                          format.
- *   file_name (string)   - The file name in the image directory of the picture.
- *   user_id (string)     - The user id of the picture's owner.
- *   comments ([objects]) - An array of Comments with the properties:
- *       _id (string)       - The ID of the comment.
- *       date_time (date)   - The date the comment was made in ISO format.
- *       comment (string)   - The text of the comment.
- *       user: (object)     - The user who made the comment.
- *       photo_id: (string) - The ID of the photo the comment belongs to.
- *
- * models.schemaModel() - A function that returns the test info from the
- * fake schema. The function returns an object containing:
- *   _id (string)           - The ID of the schema.
- *   __v (number)           - The version number.
- *   load_date_time (date)  - The date the schema was made in ISO format.
- */
-
 const schemaInfo = {
   load_date_time: "Fri Apr 29 2016 01:45:15 GMT-0700 (PDT)",
   __v: 0,
   _id: "57231f1b30e4351f4e9f4bf6",
 };
-
-// Create init users.
 
 const im = {
   _id: "57231f1a30e4351f4e9f4bd7",
@@ -106,7 +59,6 @@ const jo = {
 
 const users = [im, er, pt, rk, al, jo];
 
-// Create initial photos.
 const photo1 = {
   _id: "57231f1a30e4351f4e9f4bdd",
   date_time: "2012-08-30 10:44:23",
@@ -195,7 +147,6 @@ const photos = [
   photo12,
 ];
 
-// Create initial comments.
 const comment1 = {
   _id: "57231f1a30e4351f4e9f4be9",
   date_time: "2012-09-02 14:01:00",
@@ -341,7 +292,7 @@ const comments = [
 comments.forEach(function (comment) {
   const photo = photos.filter(function (photo) {
     return photo._id === comment.photo_id;
-  })[0]; // Only one match. Return the content of the match inside the array
+  })[0];
 
   if (!photo.comments) {
     photo.comments = [];
