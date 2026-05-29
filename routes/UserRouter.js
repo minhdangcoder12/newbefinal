@@ -1,9 +1,11 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const User = require("../db/userModel");
-const Photo = require("../db/photoModel");  // ← thêm dòng này
+const Photo = require("../db/photoModel");
+
 const router = express.Router();
 
+// Chuẩn hóa object user trả về client, không bao giờ gửi password.
 function publicUser(user) {
   return {
     _id: user._id,
@@ -16,7 +18,7 @@ function publicUser(user) {
   };
 }
 
-// POST /user
+// POST /user: đăng ký tài khoản mới. Route này public nên được mount trước requireLogin trong index.js.
 router.post("/", async (req, res) => {
   const {
     login_name: loginName,
@@ -28,6 +30,7 @@ router.post("/", async (req, res) => {
     occupation,
   } = req.body || {};
 
+  // Các field bắt buộc theo đề bài: login_name, password, first_name, last_name.
   if (!loginName || !loginName.trim()) {
     return res.status(400).send("login_name is required");
   }
@@ -42,11 +45,13 @@ router.post("/", async (req, res) => {
   }
 
   try {
+    // Không cho đăng ký trùng login_name.
     const existingUser = await User.findOne({ login_name: loginName.trim() });
     if (existingUser) {
       return res.status(400).send("login_name already exists");
     }
 
+    // Lưu password dạng text theo yêu cầu bài; thực tế production nên hash password.
     const user = await User.create({
       login_name: loginName.trim(),
       password,
@@ -63,7 +68,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-// GET /user/list
+// GET /user/list: trả danh sách user cho sidebar bên trái.
 router.get("/list", async (req, res) => {
   try {
     const users = await User.find({}, "_id first_name last_name");
@@ -73,7 +78,8 @@ router.get("/list", async (req, res) => {
   }
 });
 
-// GET /user/counts  ← phải đặt TRƯỚC /:id
+// GET /user/counts: thống kê số ảnh và số comment của từng user.
+// Route cụ thể phải đặt trước /:id, nếu không Express sẽ hiểu "counts" là id.
 router.get("/counts", async (req, res) => {
   try {
     const users = await User.find({}, "_id");
@@ -102,7 +108,8 @@ router.get("/counts", async (req, res) => {
   }
 });
 
-// GET /user/userComments/:id  ← phải đặt TRƯỚC /:id
+// GET /user/userComments/:id: lấy tất cả comment do một user viết.
+// Comment được nhúng trong từng photo, nên phải duyệt tất cả photo để tìm.
 router.get("/userComments/:id", async (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
     return res.status(400).json({ error: "Invalid user ID" });
@@ -135,7 +142,8 @@ router.get("/userComments/:id", async (req, res) => {
   }
 });
 
-// GET /user/:id  ← phải đặt SAU các route cụ thể
+// GET /user/:id: lấy thông tin chi tiết của một user.
+// Đặt cuối cùng vì đây là route động.
 router.get("/:id", async (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
     return res.status(400).json({ error: "Invalid user ID" });

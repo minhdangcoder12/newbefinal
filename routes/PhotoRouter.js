@@ -6,11 +6,13 @@ const Photo = require("../db/photoModel");
 const User = require("../db/userModel");
 const router = express.Router();
 
+// Cấu hình multer để lưu file upload vào thư mục images trên backend.
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, path.join(__dirname, "..", "images"));
   },
   filename: (req, file, cb) => {
+    // Tạo tên file duy nhất để tránh ghi đè ảnh cũ khi nhiều người upload cùng tên file.
     const extension = path.extname(file.originalname || "");
     const uniqueName = `${Date.now()}-${Math.round(
       Math.random() * 1e9
@@ -21,8 +23,9 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// POST /photos/new
+// POST /photos/new: upload ảnh mới cho user đang đăng nhập.
 router.post("/new", upload.any(), async (req, res) => {
+  // upload.any() nhận file với bất kỳ field name nào, ví dụ "photo" hoặc "uploadedphoto".
   const file = req.files && req.files[0];
 
   if (!file) {
@@ -30,9 +33,11 @@ router.post("/new", upload.any(), async (req, res) => {
   }
 
   try {
+    // Chỉ lưu tên file trong DB; file thật nằm ở thư mục images.
     const photo = await Photo.create({
       file_name: file.filename,
       date_time: new Date(),
+      // req.session.user_id được tạo lúc login trong AdminRouter.
       user_id: req.session.user_id,
       comments: [],
     });
@@ -49,7 +54,7 @@ router.post("/new", upload.any(), async (req, res) => {
   }
 });
 
-// GET /api/photo/photosOfUser/:id
+// GET /photosOfUser/:id: lấy tất cả ảnh của một user và populate user cho từng comment.
 router.get("/:id", async (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
     return res.status(400).json({ error: "Invalid user ID" });
@@ -62,6 +67,7 @@ router.get("/:id", async (req, res) => {
 
     const result = await Promise.all(
       photos.map(async (photo) => {
+        // Comment chỉ lưu user_id, nên phải query User để frontend hiển thị tên người comment.
         const comments = await Promise.all(
           photo.comments.map(async (comment) => {
             const user = await User.findById(

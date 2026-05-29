@@ -1,37 +1,28 @@
 const mongoose = require("mongoose");
 
-/**
- * Define the Mongoose Schema for a Comment.
- */
+// Comment là subdocument nằm bên trong một Photo, không có collection riêng.
 const commentSchema = new mongoose.Schema({
-  // The text of the comment.
+  // Nội dung comment.
   comment: String,
-  // The date and time when the comment was created.
+  // Thời điểm comment được tạo.
   date_time: { type: Date, default: Date.now },
-  // The ID of the user who created the comment.
+  // ID của user tạo comment.
   user_id: mongoose.Schema.Types.ObjectId,
 });
 
-/**
- * Define the Mongoose Schema for a Photo.
- */
+// Photo lưu tên file ảnh, chủ sở hữu ảnh và danh sách comment.
 const photoSchema = new mongoose.Schema({
-  // Name of the file containing the photo (in the project6/images directory).
+  // Tên file ảnh trong thư mục images.
   file_name: { type: String },
-  // The date and time when the photo was added to the database.
+  // Thời điểm ảnh được upload/thêm vào DB.
   date_time: { type: Date, default: Date.now },
-  // The ID of the user who created the photo.
+  // ID của user sở hữu ảnh.
   user_id: mongoose.Schema.Types.ObjectId,
-  // Array of comment objects representing the comments made on this photo.
+  // Các comment của ảnh này.
   comments: [commentSchema],
 });
 
-/**
- * Create a Mongoose Model for a Photo using the photoSchema.
- */
+// Tạo model Photos để thao tác với collection photos.
 const Photo = mongoose.model.Photos || mongoose.model("Photos", photoSchema);
 
-/**
- * Make this available to our application.
- */
 module.exports = Photo;
